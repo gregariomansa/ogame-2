@@ -17,12 +17,12 @@ def send_mail(mailserver, fromaddr, passwd, toaddr, obj, msg):
 if __name__=="__main__":
 
 #global configuration
-    game = OGame('antares', 'godjo', 'polkaudio')
+    game = OGame('universe', 'login', 'pass')
     
     mailserver='smtp.gmail.com:587'
-    fromaddr='poloplop6@gmail.com'
-    toaddr='stephane.dorre@gmail.com'
-    passwd='poiuazer'
+    fromaddr=''
+    toaddr=''
+    passwd=''
     obj="[OGAME ALERTE]"
     msg="Attention, vous etes attaque par qqun? arrivee prevue : xxxx"
   
