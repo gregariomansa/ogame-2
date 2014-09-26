@@ -6,8 +6,6 @@ import datetime
 import requests
 import json
 
-import smtplib 
-
 class OGame(object):
     def __init__(self, universe, username, password, domain='fr.ogame.gameforge.com'):
         self.session = requests.session()
@@ -352,40 +350,3 @@ class OGame(object):
         version = footer.find('a').text.strip()
         return version
 
-def send_mail(mailserver, fromaddr, passwd, toaddr, obj, msg):
-
-    headers=["from: Anonymous <plop@inconnu.com>",
-	    "subject: "+obj,
-	    "content-type: text/html"]
-    headers = "\r\n".join(headers)
-
-    server = smtplib.SMTP(mailserver)
-    server.starttls()
-    server.login(fromaddr, passwd)
-    server.sendmail(fromaddr,toaddr, headers+ "\r\n\r\n" + msg)
-    server.quit()
-
-if __name__=="__main__":
-
-    game = OGame('universe', 'login', 'pass')
-    
-    mailserver='smtp.gmail.com:587'
-    fromaddr=''
-    toaddr=''
-    passwd=''
-    obj="[OGAME ALERTE]"
-    msg="Attention, vous etes attaque par qqun? arrivee prevue : xxxx"
-  
-    if game.is_under_attack():
-	send_mail(mailserver, fromaddr, passwd, toaddr, obj, msg)
-    
-    s = game.get_planet_ids()
-    print s
-    for i in s:
-	print game.get_resources(i)
-    
-    print "Logout"
-    game.logout()
-
-
-    
