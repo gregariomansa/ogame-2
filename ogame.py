@@ -135,6 +135,39 @@ class OGame(object):
                 return id
         return None
 
+    def get_planet_infos(self):
+	res = self.session.get(self.get_url('overview')).content
+        soup = BeautifulSoup(res)
+        planets = soup.findAll('div', {'class': 'smallplanet'})
+        infos = []
+	for planet in planets:
+	    identity = planet['id'].replace('planet-', '')
+	    coord = planet.find('span', {'class': 'planet-koords'}).string
+            name = planet.find('span', {'class': 'planet-name'}).string
+	   
+	    construction = planet.find('a', {'class': 'constructionIcon tooltip js_hideTipOnMobile'})
+	    if construction is None:
+		construction = ''
+	    else:
+		construction = construction.get('title')
+	    
+	    size = planet.find('a', {'class': 'planetlink tooltipRight js_hideTipOnMobile'})
+	    if size is None:
+		size = planet.find('a', {'class': 'planetlink active tooltipRight js_hideTipOnMobile'})
+	    size = size.get('title')
+	    index1=size.find('<BR>')
+	    index2=size.find('<BR>',index1+1)
+	    
+	    result = {'id':identity,
+			'name':name,
+			'coord':coord,
+			'construction':construction,
+			'size':size[index1+4:index2],
+			'temperature':size[index2+4:]}
+	    infos.append(result)
+			
+	return infos
+
     def build_defense(self, planet_id, defense_id, nbr):
         """Build a defense unit."""
         if defense_id not in constants.Defense.values():
