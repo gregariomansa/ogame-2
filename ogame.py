@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import datetime
 import requests
 import json
+import re
 
 class OGame(object):
     def __init__(self, universe, username, password, domain='fr.ogame.gameforge.com'):
@@ -308,25 +309,34 @@ class OGame(object):
         events = soup.findAll('tr', {'class': 'eventFleet'})
         attacks = []
         for ev in events:
-            attack = {}
-            coords_origin = ev.find('td', {'class': 'coordsOrigin'}) \
+            #analyse the type of the mission, 1 correspond to an attack
+            if ev.get('data-mission-type') =='1':
+                attack = {}
+                coords_origin = ev.find('td', {'class': 'coordsOrigin'}) \
                               .text.strip()
-            coords = re.search(r'\[(\d+):(\d+):(\d+)\]', coords_origin)
-            galaxy, system, position = coords.groups()
-            attack.update({'origin': (galaxy, system, position)})
+                coords = re.search(r'\[(\d+):(\d+):(\d+)\]', coords_origin)
+                galaxy, system, position = coords.groups()
+                attack.update({'origin': (galaxy, system, position)})
 
-            dest_coords = ev.find('td', {'class': 'destCoords'}).text.strip()
-            coords = re.search(r'\[(\d+):(\d+):(\d+)\]', coords_origin)
-            galaxy, system, position = coords.groups()
-            attack.update({'destination': (galaxy, system, position)})
+                dest_coords = ev.find('td', {'class': 'destCoords'}).text.strip()
+                coords = re.search(r'\[(\d+):(\d+):(\d+)\]', dest_coords)
+                galaxy, system, position = coords.groups()
+                attack.update({'destination': (galaxy, system, position)})
 
-            arrival_time = ev.find('td', {'class': 'arrivalTime'}).text.strip()
-            coords = re.search(r'(\d+):(\d+):(\d+)', arrival_time)
-            hour, minute, second = coords.groups()
-            arrival_time = get_datetime_from_time(hour, minute, second)
-            attack.update({'arrival_time': arrival_time})
+                arrival_time = ev.find('td', {'class': 'arrivalTime'}).text.strip()
+                coords = re.search(r'(\d+):(\d+):(\d+)', arrival_time)
+                hour, minute, second = coords.groups()
+                
+                arrival_time = self.get_datetime_from_time(int(hour), int(minute), int(second))
+                attack.update({'arrival_time': arrival_time})
 
-            attacks.append(attack)
+                code = ev.find('td', {'class':'icon_movement'}).span
+                #the composition is a html code integrated in the title property
+                codeHTML = BeautifulSoup(code.get('title'))
+                compo = codeHTML.find('table', {'class':'fleetinfo'})
+                attack.update({'composition':compo})
+
+                attacks.append(attack)
         return attacks
 
     def get_datetime_from_time(self, hour, minute, second):

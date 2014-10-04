@@ -17,18 +17,31 @@ def send_mail(mailserver, fromaddr, passwd, toaddr, obj, msg):
 if __name__=="__main__":
 
 #global configuration
-    game = OGame('universe', 'login', 'pass')
+    game = OGame('', '', '')
     
     mailserver='smtp.gmail.com:587'
     fromaddr=''
     toaddr=''
     passwd=''
-    obj="[OGAME ALERTE]"
-    msg="Attention, vous etes attaque par qqun? arrivee prevue : xxxx"
+    obj="[OGAME ALERTE] attaque a %s"
+    msg="""Attention, vous etes attaque par un joueur
+    <br/>origine : %s
+    <br/>destination : %s
+    <br/>arrivee prevue : %s
+    <br/>%s"""
   
 #surveillance of your account
-    #if game.is_under_attack():
-    #send_mail(mailserver, fromaddr, passwd, toaddr, obj, msg)
+    if game.is_under_attack():
+        attacks = game.get_attacks()
+        for attack in attacks:
+            origin = attack.get('origin')
+            dest = attack.get('destination')
+            arrival = attack.get('arrival_time')
+            compo = attack.get('composition')
+            msgFinal = msg%(origin, dest, arrival, compo)
+            objFinal = obj%arrival
+            #print msgFinal
+            send_mail(mailserver, fromaddr, passwd, toaddr, objFinal, msgFinal)
     
 #watch all vailable resources
     s = game.get_planet_ids()
