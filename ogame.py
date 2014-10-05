@@ -146,15 +146,18 @@ class OGame(object):
 	    coord = planet.find('span', {'class': 'planet-koords'}).string
             name = planet.find('span', {'class': 'planet-name'}).string
 	   
-	    construction = planet.find('a', {'class': 'constructionIcon tooltip js_hideTipOnMobile'})
+	    construction = planet.find('a', 
+                    {'class': 'constructionIcon tooltip js_hideTipOnMobile'})
 	    if construction is None:
 		construction = ''
 	    else:
 		construction = construction.get('title')
 	    
-	    size = planet.find('a', {'class': 'planetlink tooltipRight js_hideTipOnMobile'})
+	    size = planet.find('a', 
+                    {'class': 'planetlink tooltipRight js_hideTipOnMobile'})
 	    if size is None:
-		size = planet.find('a', {'class': 'planetlink active tooltipRight js_hideTipOnMobile'})
+		size = planet.find('a', 
+                        {'class': 'planetlink active tooltipRight js_hideTipOnMobile'})
 	    size = size.get('title')
 	    index1=size.find('<BR>')
 	    index2=size.find('<BR>',index1+1)
@@ -333,7 +336,13 @@ class OGame(object):
                 code = ev.find('td', {'class':'icon_movement'}).span
                 #the composition is a html code integrated in the title property
                 codeHTML = BeautifulSoup(code.get('title'))
-                compo = codeHTML.find('table', {'class':'fleetinfo'})
+                table = codeHTML.find('table', {'class':'fleetinfo'})
+                trs = table.findAll('tr')[1:]
+                compo = {}
+                for tr in trs:
+                    cells = tr.findAll('td')
+                    compo.update({cells[0].string:int(cells[1].string)})
+                print compo
                 attack.update({'composition':compo})
 
                 attacks.append(attack)
